@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 
 import 'package:pedometer/pedometer.dart';
+import 'package:screen_state/screen_state.dart';
 
 String formatDate(DateTime d) {
   return d.toString().substring(0, 19);
@@ -20,6 +21,9 @@ class _MyAppState extends State<MyApp> {
   Stream<StepCount> _stepCountStream;
   Stream<PedestrianStatus> _pedestrianStatusStream;
   String _status = '?', _steps = '?';
+
+  Screen _screen;
+  StreamSubscription<ScreenStateEvent> _subscription;
 
   @override
   void initState() {
@@ -66,6 +70,23 @@ class _MyAppState extends State<MyApp> {
     _stepCountStream.listen(onStepCount).onError(onStepCountError);
 
     if (!mounted) return;
+  }
+
+  void onData(ScreenStateEvent event) {
+    print(event);
+  }
+
+  void startListening() {
+    _screen = new Screen();
+    try {
+      _subscription = _screen.screenStateStream.listen(onData);
+    } on ScreenStateException catch (exception) {
+      print(exception);
+    }
+  }
+
+  void stopListening() {
+    _subscription.cancel();
   }
 
   @override
